@@ -1,0 +1,45 @@
+# helm_charts/mysql-helm/values.yaml
+
+# General configuration
+replicaCount: 1
+
+# MySQL Authentication
+auth:
+  rootPassword: "dummy-mysql-root-password" # <-- DUMMY: CHANGE THIS IN K8S SECRET LATER!
+  username: "n8nuser"                     # User for n8n to connect
+  password: "dummy-n8n-db-password"      # <-- DUMMY: CHANGE THIS IN K8S SECRET LATER!
+  database: "n8n_database"               # Database name for n8n
+
+# Service configuration
+service:
+  type: ClusterIP # Internal access for n8n
+  port: 3306
+
+# Persistence for MySQL data
+persistence:
+  enabled: true
+  storageClass: "ceph-block" # Using your Ceph block storage
+  size: 5Gi # Sufficient for n8n's database, adjust if n8n will store large amounts of data
+  accessModes:
+    - ReadWriteOnce
+
+# Resource requests and limits for MySQL pod
+resources:
+  requests:
+    cpu: 500m  # Request 0.5 CPU core
+    memory: 1Gi  # Request 1 GiB of RAM
+  limits:
+    cpu: 1     # Limit to 1 CPU core
+    memory: 2Gi  # Limit to 2 GiB of RAM
+
+# Tolerations to allow deployment on the master node
+tolerations:
+  - key: "node-role.kubernetes.io/control-plane"
+    operator: "Exists"
+    effect: "NoSchedule"
+
+# Node Selector (optional, for specific nodes)
+nodeSelector: {}
+
+# Affinity (optional)
+affinity: {}

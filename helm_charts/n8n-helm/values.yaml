@@ -1,0 +1,230 @@
+# helm_charts/n8n-helm/values.yaml
+
+# Default helm values for n8n.
+# Default values within the n8n application can be found under https://github.com/n8n-io/n8n/blob/master/packages/cli/config/index.ts
+n8n:
+  encryption_key: # n8n creates a random encryption key automatically on the first launch and saves it in the ~/.n8n folder. That key is used to encrypt the credentials before they get saved to the database.
+defaults:
+
+config:
+  executions:
+    pruneData: "true" # prune executions by default
+    pruneDataMaxAge: 3760 # Per default we store 1 year of history
+
+  # This section configures the database connection for n8n
+  # We will use an external MySQL database
+  # existingSecret and secret are exclusive, with existingSecret taking priority.
+  # We will let Helm create a secret based on the values below for the MySQL password.
+  secret:
+    database:
+      mysqldb: # <--- CHANGED: Using MySQL for database
+        password: "dummy-n8n-db-password" # <--- DUMMY: MATCHES MySQL's n8nuser password
+
+database:
+  type: mysqldb # <--- CHANGED: Set to mysqldb
+  tablePrefix: # Prefix for table names - default: ''
+  mysqldb: # <--- CHANGED: MySQL specific config
+    # The host name for MySQL will be the Kubernetes Service name in the same namespace
+    # Format: <mysql-helm-release-name>-mysql
+    host: mysql-release-mysql # <--- CHANGED: Point to your new MySQL service
+    database: "n8n_database" # <--- CHANGED: Matches MySQL's database name
+    port: 3306 # <--- CHANGED: MySQL default port
+    user: "n8nuser" # <--- CHANGED: Matches MySQL's username
+credentials:
+  overwrite:
+    data: # Overwrites for credentials - default: "{}"
+    endpoint: # Fetch credentials from API - default: ''
+
+executions:
+  process: own
+  timeout: -1
+  maxTimeout: 3600
+  saveDataOnError: all
+  saveDataOnSuccess: all
+  saveDataManualExecutions: false
+  pruneData: "true"
+  pruneDataMaxAge: 3760
+  pruneDataTimeout: 3600
+generic:
+  timezone: Asia/Kolkata # <--- SUGGESTED CHANGE: Set to your local timezone
+path: /
+host: localhost # Will be overridden by Cloudflare routing.
+port: 5678 # n8n's default HTTP port
+listen_address: 0.0.0.0
+protocol: http # If you use HTTPS for your domain, you'll need SSL termination at Cloudflare.
+ssl_key:
+ssl_cert:
+security:
+  excludeEndpoints:
+  basicAuth:
+    active: false
+    user:
+    password:
+    hash: false
+  jwtAuth:
+    active: false
+    jwtHeader:
+    jwtHeaderValuePrefix:
+    jwksUri:
+    jwtIssuer:
+    jwtNamespace:
+    jwtAllowedTenantKey:
+    jwtAllowedTenant:
+endpoints:
+  rest: rest
+  webhook: webhook
+  webhookTest: webhook-test
+  webhookWaiting: webhook-waiting
+externalHookFiles:
+nodes:
+  exclude: "[]"
+  errorTriggerType: n8n-nodes-base.errorTrigger
+
+# Set additional environment variables on the Deployment
+extraEnv:
+  # Crucial for n8n webhooks to work correctly when behind a reverse proxy/Cloudflare
+  # You WILL need to uncomment and set this to your actual n8n domain (e.g., https://n8n.yourdomain.com/)
+  # once you have your Cloudflare routing set up.
+  # WEBHOOK_URL: "http://n8n.example.com/" # Example - update with your actual URL
+  # WEBHOOK_URL_BASE_URL: "http://n8n.example.com/" # Example - some older n8n versions might use this
+
+# Set additional environment from existing secrets
+extraEnvSecrets: {}
+
+##
+##
+##
+##
+## Common Kubernetes Config Settings
+persistence:
+  ## If true, use a Persistent Volume Claim, If false, use emptyDir
+  enabled: true # <--- CHANGED: Enable persistence for n8n's internal settings/credentials
+  type: dynamic # <--- CHANGED: Use dynamic provisioning
+  ## Persistent Volume Storage Class
+  storageClass: "ceph-block" # <--- CHANGED: Use your Ceph block storage class
+  accessModes:
+    - ReadWriteOnce
+  size: 1Gi # Size for n8n's internal settings data. Sufficient.
+  # existingClaim:
+
+replicaCount: 1
+
+deploymentStrategy:
+  type: "Recreate"
+
+image:
+  repository: n8nio/n8n
+  pullPolicy: IfNotPresent
+  tag: "" # Keep empty for latest stable from chart's appVersion
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podLabels: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+lifecycle: {}
+
+command: []
+
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  # initialDelaySeconds: 30
+  # periodSeconds: 10
+  # timeoutSeconds: 5
+  # failureThreshold: 6
+  # successThreshold: 1
+
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  # initialDelaySeconds: 30
+  # periodSeconds: 10
+  # timeoutSeconds: 5
+  # failureThreshold: 6
+  # successThreshold: 1
+
+initContainers: []
+
+service:
+  type: ClusterIP # CONFIRMED: ClusterIP, as Cloudflare handles external routing
+  port: 80 # n8n's default internal port
+  annotations: {}
+
+ingress:
+  enabled: false # CONFIRMED: Disabled, as Cloudflare handles it externally
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths: []
+  tls: []
+  className: ""
+
+workerResources:
+  {}
+
+webhookResources:
+  {}
+
+resources:
+  # Resource requests and limits for n8n application
+  requests:
+    cpu: 600m # Request 0.6 CPU core (slightly more for n8n itself)
+    memory: 1Gi # Request 1 GiB of RAM
+  limits:
+    cpu: 1.5 # Limit to 1.5 CPU cores
+    memory: 2Gi # Limit to 2 GiB of RAM
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations:
+  # Add toleration to run on master node
+  - key: "node-role.kubernetes.io/control-plane"
+    operator: "Exists"
+    effect: "NoSchedule"
+
+affinity: {}
+
+scaling:
+  enabled: false
+  worker:
+    count: 2
+    concurrency: 2
+  webhook:
+    enabled: false
+    count: 1
+  # This Redis section in the n8n chart is for caching/queueing within n8n,
+  # not the primary database. We are using MySQL for the primary database.
+  redis:
+    host:
+    password:
+
+## Bitnami Redis configuration (unrelated to our MySQL setup)
+redis:
+  enabled: false
+  architecture: standalone
+  master:
+    persistence:
+      enabled: true
+      existingClaim: ""
+      size: 2Gi
