@@ -1,0 +1,43 @@
+# n8n-mysql-applicationset.yaml
+
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: n8n-mysql-deployment # Descriptive name for this ApplicationSet
+  namespace: argocd # ApplicationSets must live in the argocd namespace
+spec:
+  generators:
+  - list: # Using a List generator to define each application explicitly
+      elements:
+      - appName: mysql-release # Name for the MySQL Argo CD Application and Helm release
+        chartPath: helm_charts/mysql-helm # Path to your MySQL Helm chart in the Git repo
+        destNamespace: n8n-app # Namespace for MySQL
+        argocdProject: default # Argo CD Project
+      - appName: n8n-release # Name for the n8n Argo CD Application and Helm release
+        chartPath: helm_charts/n8n-helm # Path to your n8n Helm chart in the Git repo
+        destNamespace: n8n-app # Namespace for n8n
+        argocdProject: default # Argo CD Project
+  template:
+    metadata:
+      name: '{{appName}}-application' # Generated Argo CD Application names (e.g., 'mysql-release-application', 'n8n-release-application')
+    spec:
+      project: '{{argocdProject}}'
+      source:
+        repoURL: git@github.com:2cloudfze/local_cluster_helm_repository.git # Your Git repository URL
+        targetRevision: main
+        path: '{{chartPath}}' # Uses the chartPath from the list element
+        helm: # Specify that this is a Helm chart
+          # values: | # If you want to provide values directly here, but usually better to keep in values.yaml
+          #   replicaCount: 1
+          releaseName: '{{appName}}' # Ensure Helm uses the 'appName' as its release name
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{destNamespace}}' # Uses the destNamespace from the list element
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true # Ensure the namespace is created if it doesn't exist
+  syncPolicy:
+    applicationsSync: create-update
