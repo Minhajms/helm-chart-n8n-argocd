@@ -58,6 +58,10 @@ primary:
     ports:
       mysql: 3306
     annotations: {}
+    # Headless service configuration
+    headless:
+      annotations: {}
+      labels: {}
   
   # Persistence configuration for primary
   persistence:
