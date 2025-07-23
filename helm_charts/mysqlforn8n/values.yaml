@@ -4,9 +4,9 @@ replicaCount: 1
 # MySQL Authentication
 auth:
   rootPassword: "dummy-mysql-root-password" # <-- DUMMY: CHANGE THIS IN K8S SECRET LATER!
-  username: "n8nuser"                     # User for n8n to connect
-  password: "dummy-n8n-db-password"      # <-- DUMMY: CHANGE THIS IN K8S SECRET LATER!
-  database: "n8n_database"               # Database name for n8n
+  username: "n8nuser"                        # User for n8n to connect
+  password: "dummy-n8n-db-password"          # <-- DUMMY: CHANGE THIS IN K8S SECRET LATER!
+  database: "n8n_database"                   # Database name for n8n
 
 # Service configuration
 service:
@@ -46,9 +46,11 @@ affinity: {}
 passwordUpdateJob:
   enabled: false
 
-# 🔧 Fix for "nil pointer evaluating interface {}.mysql" error
+# Fix for nil pointer issue in template
 primary:
   service:
-    annotations: {}
+    headless:
+      annotations: {}     # <-- Prevents .annotations nil pointer error
+    annotations: {}       # <-- Optional, if used in other service templates
     ports:
       mysql: 3306
