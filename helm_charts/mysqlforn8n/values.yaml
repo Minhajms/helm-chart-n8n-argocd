@@ -18,19 +18,19 @@ service:
 # Persistence for MySQL data
 persistence:
   enabled: true
-  storageClass: "standard" # Using your Ceph block storage
-  size: 5Gi # Sufficient for n8n's database, adjust if n8n will store large amounts of data
+  storageClass: "standard"
+  size: 5Gi
   accessModes:
     - ReadWriteOnce
 
 # Resource requests and limits for MySQL pod
 resources:
   requests:
-    cpu: 500m  # Request 0.5 CPU core
-    memory: 1Gi  # Request 1 GiB of RAM
+    cpu: 500m
+    memory: 1Gi
   limits:
-    cpu: 1     # Limit to 1 CPU core
-    memory: 2Gi  # Limit to 2 GiB of RAM
+    cpu: 1
+    memory: 2Gi
 
 # Tolerations to allow deployment on the master node
 tolerations:
@@ -44,6 +44,11 @@ nodeSelector: {}
 # Affinity (optional)
 affinity: {}
 
-# Update Password Job configuration (required for robust templates)
+# Update Password Job configuration
 passwordUpdateJob:
-  enabled: false # Set to true if you want to enable automated password update jobs
+  enabled: false
+
+# 🔧 Add this block to avoid nil pointer error during Helm rendering
+primary:
+  service:
+    annotations: {}
