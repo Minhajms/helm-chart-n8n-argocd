@@ -46,6 +46,12 @@ affinity: {}
 passwordUpdateJob:
   enabled: false
 
+# Service Account configuration
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
 # Primary MySQL configuration - Fixed structure
 primary:
   # Container ports configuration
