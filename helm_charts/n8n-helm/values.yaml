@@ -1,40 +1,36 @@
 # helm_charts/n8n-helm/values.yaml
 
-# Default helm values for n8n.
-# Default values within the n8n application can be found under https://github.com/n8n-io/n8n/blob/master/packages/cli/config/index.ts
 n8n:
-  encryption_key: # n8n creates a random encryption key automatically on the first launch and saves it in the ~/.n8n folder. That key is used to encrypt the credentials before they get saved to the database.
+  encryption_key:
 
 defaults:
 
 config:
   executions:
-    pruneData: "true" # prune executions by default
-    pruneDataMaxAge: 3760 # Per default we store 1 year of history
+    pruneData: "true"
+    pruneDataMaxAge: 3760
 
-  # This section configures the database connection for n8n
-  # Use environment variables for database connection instead of secret section
   database:
     type: mysqldb
     mysqldb:
-      host: mysql-for-n8n # This should match your MySQL service name
+      host: mysql-for-n8n
       database: "n8n_database"
       port: 3306
       user: "n8nuser"
 
 database:
   type: mysqldb
-  tablePrefix: # Prefix for table names - default: ''
+  tablePrefix:
   mysqldb:
-    host: mysql-for-n8n # Point to your MySQL service name
+    host: mysql-for-n8n
     database: "n8n_database"
     port: 3306
     user: "n8nuser"
 
 credentials:
   overwrite:
-    data: # Overwrites for credentials - default: "{}"
-    endpoint: # Fetch credentials from API - default: ''
+    data:
+    endpoint:
 
 executions:
   process: own
@@ -49,6 +45,7 @@ executions:
 
 generic:
   timezone: Asia/Kolkata
+
 path: /
 host: localhost
 port: 5678
@@ -85,28 +82,17 @@ nodes:
   exclude: "[]"
   errorTriggerType: n8n-nodes-base.errorTriggerType
 
-# Set additional environment variables on the Deployment
 extraEnv:
-  # Database connection via environment variables (more reliable approach)
   DB_TYPE: "mysqldb"
   DB_MYSQLDB_HOST: "mysql-for-n8n"
   DB_MYSQLDB_PORT: "3306"
   DB_MYSQLDB_DATABASE: "n8n_database"
   DB_MYSQLDB_USER: "n8nuser"
   DB_MYSQLDB_PASSWORD: "dummy-n8n-db-password"
-  
-  # Crucial for n8n webhooks to work correctly when behind a reverse proxy/Cloudflare
-  # You WILL need to uncomment and set this to your actual n8n domain
   # WEBHOOK_URL: "https://n8n.yourdomain.com/"
 
-# Set additional environment from existing secrets
 extraEnvSecrets: {}
 
-##
-##
-##
-##
-## Common Kubernetes Config Settings
 persistence:
   enabled: true
   type: dynamic
@@ -143,13 +129,21 @@ command: []
 
 livenessProbe:
   httpGet:
-    path: /healthz
-    port: http
+    path: /
+    port: 5678
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 5
 
 readinessProbe:
   httpGet:
-    path: /healthz
-    port: http
+    path: /
+    port: 5678
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 5
 
 initContainers: []
 
@@ -205,7 +199,6 @@ scaling:
     host:
     password:
 
-## Bitnami Redis configuration (disabled since we're using MySQL)
 redis:
   enabled: false
   architecture: standalone
