@@ -54,3 +54,5 @@ primary:
     annotations: {}       # <-- Optional, if used in other service templates
     ports:
       mysql: 3306
+  containerPorts:
+    mysql: 3306            # <-- This is necessary for template compatibility
