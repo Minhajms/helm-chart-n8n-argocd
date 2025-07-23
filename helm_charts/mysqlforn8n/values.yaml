@@ -18,7 +18,7 @@ service:
 # Persistence for MySQL data
 persistence:
   enabled: true
-  storageClass: "ceph-block" # Using your Ceph block storage
+  storageClass: "standard" # Using your Ceph block storage
   size: 5Gi # Sufficient for n8n's database, adjust if n8n will store large amounts of data
   accessModes:
     - ReadWriteOnce
