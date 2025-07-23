@@ -1,106 +1,41 @@
-# General configuration
-replicaCount: 1
+# Simple MySQL Configuration for n8n
+mysql:
+  image:
+    repository: mysql
+    tag: "8.0"
+    pullPolicy: IfNotPresent
+  
+  # Database configuration
+  database: "n8n_database"
+  username: "n8nuser"
+  
+  # Passwords (use secrets in production)
+  rootPassword: "dummy-mysql-root-password"
+  password: "dummy-n8n-db-password"
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 3306
+  
+  # Storage configuration
+  persistence:
+    enabled: true
+    storageClass: "standard"
+    size: "5Gi"
+    accessMode: ReadWriteOnce
+  
+  # Resource limits
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
 
-# MySQL Authentication
-auth:
-  rootPassword: "dummy-mysql-root-password" # <-- DUMMY: CHANGE THIS IN K8S SECRET LATER!
-  username: "n8nuser"                     # User for n8n to connect
-  password: "dummy-n8n-db-password"      # <-- DUMMY: CHANGE THIS IN K8S SECRET LATER!
-  database: "n8n_database"               # Database name for n8n
-
-# Service configuration
-service:
-  type: ClusterIP # Internal access for n8n
-  port: 3306
-
-# Persistence for MySQL data
-persistence:
-  enabled: true
-  storageClass: "standard"  # Minikube default StorageClass
-  size: 5Gi                 # Sufficient for n8n's database
-  accessModes:
-    - ReadWriteOnce
-
-# Resource requests and limits for MySQL pod
-resources:
-  requests:
-    cpu: 500m
-    memory: 1Gi
-  limits:
-    cpu: 1
-    memory: 2Gi
-
-# Tolerations to allow deployment on the master node (optional for Minikube)
+# Tolerations for master node deployment (Minikube)
 tolerations:
   - key: "node-role.kubernetes.io/control-plane"
     operator: "Exists"
     effect: "NoSchedule"
-
-# Node Selector (optional, for targeting specific nodes)
-nodeSelector: {}
-
-# Affinity rules (optional)
-affinity: {}
-
-# Password Update Job configuration
-passwordUpdateJob:
-  enabled: false
-
-# Service Account configuration
-serviceAccount:
-  create: true
-  annotations: {}
-  name: ""
-
-# Metrics configuration
-metrics:
-  enabled: false
-  image:
-    registry: docker.io
-    repository: prom/mysqld-exporter
-    tag: v0.15.1
-    pullPolicy: IfNotPresent
-  service:
-    type: ClusterIP
-    port: 9104
-    annotations: {}
-  serviceMonitor:
-    enabled: false
-
-# Primary MySQL configuration - Fixed structure
-primary:
-  # Container ports configuration
-  containerPorts:
-    mysql: 3306
-  
-  # Service configuration for primary
-  service:
-    type: ClusterIP
-    ports:
-      mysql: 3306
-    annotations: {}
-    # Headless service configuration
-    headless:
-      annotations: {}
-      labels: {}
-  
-  # Persistence configuration for primary
-  persistence:
-    enabled: true
-    storageClass: "standard"
-    size: 5Gi
-    accessModes:
-      - ReadWriteOnce
-  
-  # Resources for primary pod
-  resources:
-    requests:
-      cpu: 500m
-      memory: 1Gi
-    limits:
-      cpu: 1
-      memory: 2Gi
-
-# Secondary MySQL configuration (for replication, disabled by default)
-secondary:
-  replicaCount: 0
