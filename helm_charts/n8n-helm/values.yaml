@@ -101,7 +101,7 @@ persistence:
   enabled: true # <--- CHANGED: Enable persistence for n8n's internal settings/credentials
   type: dynamic # <--- CHANGED: Use dynamic provisioning
   ## Persistent Volume Storage Class
-  storageClass: "ceph-block" # <--- CHANGED: Use your Ceph block storage class
+  storageClass: "standard" # <--- CHANGED: Use your Ceph block storage class
   accessModes:
     - ReadWriteOnce
   size: 1Gi # Size for n8n's internal settings data. Sufficient.
