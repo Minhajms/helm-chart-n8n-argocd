@@ -1,9 +1,9 @@
 # helm_charts/n8n-helm/values.yaml
 
 n8n:
-  encryption_key:
+  encryption_key: ""
 
-defaults:
+defaults: {}
 
 config:
   executions:
@@ -13,24 +13,24 @@ config:
   database:
     type: mysqldb
     mysqldb:
-      host: mysql-for-n8n
+      host: mysqlforn8n-application-mysql-for-n8n
       database: "n8n_database"
       port: 3306
       user: "n8nuser"
 
 database:
   type: mysqldb
-  tablePrefix:
+  tablePrefix: ""
   mysqldb:
-    host: mysql-for-n8n
+    host: mysqlforn8n-application-mysql-for-n8n
     database: "n8n_database"
     port: 3306
     user: "n8nuser"
 
 credentials:
   overwrite:
-    data:
-    endpoint:
+    data: ""
+    endpoint: ""
 
 executions:
   process: own
@@ -51,25 +51,25 @@ host: localhost
 port: 5678
 listen_address: 0.0.0.0
 protocol: http
-ssl_key:
-ssl_cert:
+ssl_key: ""
+ssl_cert: ""
 
 security:
-  excludeEndpoints:
+  excludeEndpoints: ""
   basicAuth:
     active: false
-    user:
-    password:
+    user: ""
+    password: ""
     hash: false
   jwtAuth:
     active: false
-    jwtHeader:
-    jwtHeaderValuePrefix:
-    jwksUri:
-    jwtIssuer:
-    jwtNamespace:
-    jwtAllowedTenantKey:
-    jwtAllowedTenant:
+    jwtHeader: ""
+    jwtHeaderValuePrefix: ""
+    jwksUri: ""
+    jwtIssuer: ""
+    jwtNamespace: ""
+    jwtAllowedTenantKey: ""
+    jwtAllowedTenant: ""
 
 endpoints:
   rest: rest
@@ -77,14 +77,15 @@ endpoints:
   webhookTest: webhook-test
   webhookWaiting: webhook-waiting
 
-externalHookFiles:
+externalHookFiles: ""
+
 nodes:
   exclude: "[]"
   errorTriggerType: n8n-nodes-base.errorTriggerType
 
 extraEnv:
   DB_TYPE: "mysqldb"
-  DB_MYSQLDB_HOST: "mysql-for-n8n"
+  DB_MYSQLDB_HOST: "mysqlforn8n-application-mysql-for-n8n"
   DB_MYSQLDB_PORT: "3306"
   DB_MYSQLDB_DATABASE: "n8n_database"
   DB_MYSQLDB_USER: "n8nuser"
@@ -196,8 +197,8 @@ scaling:
     enabled: false
     count: 1
   redis:
-    host:
-    password:
+    host: ""
+    password: ""
 
 redis:
   enabled: false
