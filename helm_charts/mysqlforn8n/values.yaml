@@ -4,9 +4,9 @@ replicaCount: 1
 # MySQL Authentication
 auth:
   rootPassword: "dummy-mysql-root-password" # <-- DUMMY: CHANGE THIS IN K8S SECRET LATER!
-  username: "n8nuser"                        # User for n8n to connect
-  password: "dummy-n8n-db-password"          # <-- DUMMY: CHANGE THIS IN K8S SECRET LATER!
-  database: "n8n_database"                   # Database name for n8n
+  username: "n8nuser"                     # User for n8n to connect
+  password: "dummy-n8n-db-password"      # <-- DUMMY: CHANGE THIS IN K8S SECRET LATER!
+  database: "n8n_database"               # Database name for n8n
 
 # Service configuration
 service:
@@ -46,13 +46,36 @@ affinity: {}
 passwordUpdateJob:
   enabled: false
 
-# Fix for nil pointer issue in template
+# Primary MySQL configuration - Fixed structure
 primary:
+  # Container ports configuration
+  containerPorts:
+    mysql: 3306
+  
+  # Service configuration for primary
   service:
-    headless:
-      annotations: {}     # <-- Prevents .annotations nil pointer error
-    annotations: {}       # <-- Optional, if used in other service templates
+    type: ClusterIP
     ports:
       mysql: 3306
-  containerPorts:
-    mysql: 3306            # <-- This is necessary for template compatibility
+    annotations: {}
+  
+  # Persistence configuration for primary
+  persistence:
+    enabled: true
+    storageClass: "standard"
+    size: 5Gi
+    accessModes:
+      - ReadWriteOnce
+  
+  # Resources for primary pod
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 1
+      memory: 2Gi
+
+# Secondary MySQL configuration (for replication, disabled by default)
+secondary:
+  replicaCount: 0
