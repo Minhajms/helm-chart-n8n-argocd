@@ -43,3 +43,7 @@ nodeSelector: {}
 
 # Affinity (optional)
 affinity: {}
+
+# Update Password Job configuration (required for robust templates)
+passwordUpdateJob:
+  enabled: false # Set to true if you want to enable automated password update jobs
