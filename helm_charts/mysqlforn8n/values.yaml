@@ -1,5 +1,3 @@
-# helm_charts/mysql-helm/values.yaml
-
 # General configuration
 replicaCount: 1
 
@@ -18,8 +16,8 @@ service:
 # Persistence for MySQL data
 persistence:
   enabled: true
-  storageClass: "standard"
-  size: 5Gi
+  storageClass: "standard"  # Minikube default StorageClass
+  size: 5Gi                 # Sufficient for n8n's database
   accessModes:
     - ReadWriteOnce
 
@@ -32,23 +30,25 @@ resources:
     cpu: 1
     memory: 2Gi
 
-# Tolerations to allow deployment on the master node
+# Tolerations to allow deployment on the master node (optional for Minikube)
 tolerations:
   - key: "node-role.kubernetes.io/control-plane"
     operator: "Exists"
     effect: "NoSchedule"
 
-# Node Selector (optional, for specific nodes)
+# Node Selector (optional, for targeting specific nodes)
 nodeSelector: {}
 
-# Affinity (optional)
+# Affinity rules (optional)
 affinity: {}
 
-# Update Password Job configuration
+# Password Update Job configuration
 passwordUpdateJob:
   enabled: false
 
-# 🔧 Add this block to avoid nil pointer error during Helm rendering
+# 🔧 Fix for "nil pointer evaluating interface {}.mysql" error
 primary:
   service:
     annotations: {}
+    ports:
+      mysql: 3306
