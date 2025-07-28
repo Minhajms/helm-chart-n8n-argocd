@@ -1,4 +1,4 @@
-# ApplicationSet.yaml
+# ApplicationSet.yaml - Correct Path Resolution
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -6,22 +6,15 @@ metadata:
   namespace: argocd
 spec:
   generators:
-  - matrix:
-      generators:
-      - git:
-          repoURL: https://github.com/Minhajms/helm-chart-n8n-argocd.git
-          revision: main
-          directories:
-          - path: "helm_charts/*"
-      - list:
-          elements:
-          - env: prod
-            valueFile: values.yaml
-          - env: dev
-            valueFile: dev-values.yaml
+  # Production apps using directories generator
+  - git:
+      repoURL: https://github.com/Minhajms/helm-chart-n8n-argocd.git
+      revision: main
+      directories:
+      - path: "helm_charts/*"
   template:
     metadata:
-      name: '{{path.basename}}-{{env}}-application'
+      name: '{{path.basename}}-values-app'
     spec:
       project: default
       source:
@@ -30,19 +23,49 @@ spec:
         path: '{{path}}'
         helm:
           valueFiles:
-          - '{{valueFile}}'
+          - 'values.yaml'
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{path.basename}}-{{env}}-namespace'
-      ignoreDifferences:
-      - group: "*"
-        kind: "*"
-        jsonPointers:
-        - /metadata/namespace
+        namespace: '{{path.basename}}-values-ns'
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
         syncOptions:
         - CreateNamespace=true
-        - IgnoreMissingValueFiles=true
+---
+# Development apps using files generator with corrected path
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: ai-stack-dev-auto-generator
+  namespace: argocd
+spec:
+  generators:
+  # Dev apps using files generator
+  - git:
+      repoURL: https://github.com/Minhajms/helm-chart-n8n-argocd.git
+      revision: main
+      files:
+      - path: "helm_charts/*/dev-values.yaml"
+  template:
+    metadata:
+      name: '{{path.basenameNormalized}}-dev-values-app'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/Minhajms/helm-chart-n8n-argocd.git
+        targetRevision: main
+        path: 'helm_charts/{{path.basenameNormalized}}'  # Manually construct the directory path
+        helm:
+          valueFiles:
+          - 'dev-values.yaml'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{path.basenameNormalized}}-dev-values-ns'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
