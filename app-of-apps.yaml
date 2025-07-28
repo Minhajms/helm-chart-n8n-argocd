@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: n8n-root-app
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/refresh: normal
+    description: "Root application for N8N workflow automation stack"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Minhajms/helm-chart-n8n-argocd.git
+    targetRevision: main
+    path: .
+    directory:
+      include: "ApplicationSet.yaml"
+      exclude: "app-of-apps.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ApplyOutOfSyncOnly=true
+  info:
+  - name: Description
+    value: "Root application that manages the N8N stack ApplicationSet"

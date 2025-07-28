@@ -1,10 +1,9 @@
-# n8n-mysql-applicationset.yaml
-
+# ApplicationSet.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: n8n-stack-generator # Descriptive name for this ApplicationSet
-  namespace: argocd # ApplicationSets must live in the argocd namespace
+  name: ai-stack-generator
+  namespace: argocd
 spec:
   generators:
   - git:
@@ -12,10 +11,9 @@ spec:
       revision: main
       directories:
       - path: "helm_charts/*"
-        exclude: "helm_charts/*/*"
   template:
     metadata:
-      name: '{{path.basename}}-application' # Generated Argo CD Application names (e.g., 'mysqlforn8n-application', 'n8n-helm-application')
+      name: '{{path.basename}}-application'
     spec:
       project: default
       source:
@@ -24,7 +22,8 @@ spec:
         path: '{{path}}'
         helm:
           valueFiles:
-          - values.yaml # Use only the primary values.yaml to avoid sub-chart conflicts
+          - values.yaml
+          - dev-values.yaml
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{path.basename}}-namespace'
@@ -38,6 +37,5 @@ spec:
           prune: true
           selfHeal: true
         syncOptions:
-          - CreateNamespace=true # Ensure the namespace is created if it doesn't exist
-  syncPolicy:
-    applicationsSync: create-update
+        - CreateNamespace=true
+        - IgnoreMissingValueFiles=true
