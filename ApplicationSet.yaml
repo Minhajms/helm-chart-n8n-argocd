@@ -6,14 +6,22 @@ metadata:
   namespace: argocd
 spec:
   generators:
-  - git:
-      repoURL: https://github.com/Minhajms/helm-chart-n8n-argocd.git
-      revision: main
-      directories:
-      - path: "helm_charts/*"
+  - matrix:
+      generators:
+      - git:
+          repoURL: https://github.com/Minhajms/helm-chart-n8n-argocd.git
+          revision: main
+          directories:
+          - path: "helm_charts/*"
+      - list:
+          elements:
+          - env: prod
+            valueFile: values.yaml
+          - env: dev
+            valueFile: dev-values.yaml
   template:
     metadata:
-      name: '{{path.basename}}-application'
+      name: '{{path.basename}}-{{env}}-application'
     spec:
       project: default
       source:
@@ -22,11 +30,10 @@ spec:
         path: '{{path}}'
         helm:
           valueFiles:
-          - values.yaml
-          - dev-values.yaml
+          - '{{valueFile}}'
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{path.basename}}-namespace'
+        namespace: '{{path.basename}}-{{env}}-namespace'
       ignoreDifferences:
       - group: "*"
         kind: "*"
