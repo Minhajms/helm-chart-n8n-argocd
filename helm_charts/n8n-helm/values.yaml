@@ -13,7 +13,7 @@ config:
   database:
     type: mysqldb
     mysqldb:
-      host: mysqlforn8n-application-mysql-for-n8n.mysqlforn8n-namespace.svc.cluster.local
+      host: mysqlforn8n-values-app-mysql-for-n8n.mysqlforn8n-values-ns.svc.cluster.local
       database: "n8n_database"
       port: 3306
       user: "n8nuser"
@@ -22,7 +22,7 @@ database:
   type: mysqldb
   tablePrefix: ""
   mysqldb:
-    host: mysqlforn8n-application-mysql-for-n8n.mysqlforn8n-namespace.svc.cluster.local
+    host: mysqlforn8n-values-app-mysql-for-n8n.mysqlforn8n-values-ns.svc.cluster.local
     database: "n8n_database"
     port: 3306
     user: "n8nuser"
@@ -85,7 +85,7 @@ nodes:
 
 extraEnv:
   DB_TYPE: "mysqldb"
-  DB_MYSQLDB_HOST: "mysqlforn8n-application-mysql-for-n8n.mysqlforn8n-namespace.svc.cluster.local"
+  DB_MYSQLDB_HOST: "mysqlforn8n-values-app-mysql-for-n8n.mysqlforn8n-values-ns.svc.cluster.local"
   DB_MYSQLDB_PORT: "3306"
   DB_MYSQLDB_DATABASE: "n8n_database"
   DB_MYSQLDB_USER: "n8nuser"
