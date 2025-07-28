@@ -1,0 +1,41 @@
+# Simple MySQL Configuration for n8n
+mysql:
+  image:
+    repository: mysql
+    tag: "8.0"
+    pullPolicy: IfNotPresent
+  
+  # Database configuration
+  database: "devn8n_database"
+  username: "devn8nuser"
+  
+  # Passwords (use secrets in production)
+  rootPassword: "devdummy-mysql-root-password"
+  password: "devdummy-n8n-db-password"
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 3306
+  
+  # Storage configuration
+  persistence:
+    enabled: true
+    storageClass: "standard"
+    size: "5Gi"
+    accessMode: ReadWriteOnce
+  
+  # Resource limits
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+
+# Tolerations for master node deployment (Minikube)
+tolerations:
+  - key: "node-role.kubernetes.io/control-plane"
+    operator: "Exists"
+    effect: "NoSchedule"
